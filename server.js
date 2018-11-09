@@ -53,7 +53,7 @@ app.set("view engine", ".hbs");
 
 app.get("/", (req, res) => {
   // Get threads from the database
-  db.Article.find({})
+  db.Article.find({}).populate("notes")
     .exec((err, articles) => {
       if (err) throw err;
 
@@ -62,9 +62,13 @@ app.get("/", (req, res) => {
         res.redirect("/scrape");
 
       } else {
-        res.render("index", {
-          articles
-        });
+        var hbsObject = {
+          article: articles
+        };
+        res.render("index", hbsObject);
+        // res.render("index", {
+        //   articles
+        // });
 
       }
     });
@@ -137,39 +141,37 @@ app.get("/articles/:id", function (req, res) {
     });
 });
 
-// Route for adding a note to an article
-app.post("/articles/:id", function (req, res) {
-  db.Note.create(req.body)
-    .then(function (dbNote) {
-      return db.Article.findOneAndUpdate({
-        _id: req.params.id
-      }, {
-        $push: {
-          notes: dbNote._id
-        }
-      }, {
-        new: true
-      });
-    })
-    .then(function (dbArticle) {
-      res.json(dbArticle);
-    })
-    .catch(function (err) {
-      res.json(err);
-    });
-});
-
-// //Route for deleting a note.
-// app.delete("/articles/:id/:noteid", function (req, res) {
-//   dbNote.remove({
-//     _id: req.params.dbNote._id
+// // Route for adding a note to an article
+// app.post("/articles/:id", function (req, res) {
+//   db.Note.create({
+//     body: req.body.text,
+//     article: req.params.id
 //   })
+//     .then(function (dbNote) {
+
+//       return db.Article.findOneAndUpdate({
+//         _id: req.params.id
+//       }, {
+//         $push: {
+//           notes: dbNote._id
+//         }
+//       }, {
+//         new: true
+//       })
+//     })
+//     .then(function (dbNote) {
+//       //res.send(dbArticle)
+//       res.json(dbNote);
+//     })
+//     .catch(function (err) {
+//       res.json(err);
+//     });
 // });
 
 // Create a new note
 app.post("/notes/save/:id", function(req, res) {
   // Create a new note and pass the req.body to the entry
-  var newNote = new Note({
+  var newNote = new db.Note({
     body: req.body.text,
     article: req.params.id
   });
@@ -203,7 +205,7 @@ app.post("/notes/save/:id", function(req, res) {
 // Delete a note
 app.delete("/notes/delete/:note_id/:article_id", function(req, res) {
   // Use the note id to find and delete it
-  Note.findOneAndRemove({ "_id": req.params.note_id }, function(err) {
+  db.Note.findOneAndRemove({ "_id": req.params.note_id }, function(err) {
     // Log any errors
     if (err) {
       console.log(err);

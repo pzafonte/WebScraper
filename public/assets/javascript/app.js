@@ -15,7 +15,7 @@ $(".saveNote").on("click", function() {
             // Empty the notes section
             $("#noteText" + thisId).val("");
             $(".modalNote").modal("hide");
-            window.location = "/"
+            //window.location = "/"
         });
   }
 });
@@ -30,6 +30,6 @@ $(".deleteNote").on("click", function() {
   }).done(function(data) {
       console.log(data)
       $(".modalNote").modal("hide");
-      window.location = "/"
+      //window.location = "/"
   })
 });

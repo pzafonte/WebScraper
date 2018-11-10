@@ -9,6 +9,8 @@
     </div>
     <div class="card-body">{{this.excerpt}}</div>
   </div>
-
-  {{> notes-modal }}
   {{/each}}
+
+{{#each article}}
+    {{> notes-modal }}
+{{/each}}

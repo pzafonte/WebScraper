@@ -66,9 +66,6 @@ app.get("/", (req, res) => {
           article: articles
         };
         res.render("index", hbsObject);
-        // res.render("index", {
-        //   articles
-        // });
 
       }
     });
@@ -108,14 +105,14 @@ app.get("/scrape", function (req, res) {
             });
         }
       });
-      res.redirect("/");
+      res.redirect('/');
     });
 
 });
 
 // Route for getting all Articles from the db
 app.get("/articles", function (req, res) {
-  db.Article.find({})
+  db.Article.find({}).populate("notes")
     .then(function (dbArticle) {
       res.json(dbArticle);
     })
@@ -131,42 +128,12 @@ app.get("/articles/:id", function (req, res) {
     })
     .populate("notes")
     .then(function (dbArticle) {
-      res.render("article", {
-        "article": dbArticle
-      });
-      //res.json(dbArticle);
+      res.json(dbArticle);
     })
     .catch(function (err) {
       res.json(err);
     });
 });
-
-// // Route for adding a note to an article
-// app.post("/articles/:id", function (req, res) {
-//   db.Note.create({
-//     body: req.body.text,
-//     article: req.params.id
-//   })
-//     .then(function (dbNote) {
-
-//       return db.Article.findOneAndUpdate({
-//         _id: req.params.id
-//       }, {
-//         $push: {
-//           notes: dbNote._id
-//         }
-//       }, {
-//         new: true
-//       })
-//     })
-//     .then(function (dbNote) {
-//       //res.send(dbArticle)
-//       res.json(dbNote);
-//     })
-//     .catch(function (err) {
-//       res.json(err);
-//     });
-// });
 
 // Create a new note
 app.post("/notes/save/:id", function(req, res) {
@@ -177,7 +144,7 @@ app.post("/notes/save/:id", function(req, res) {
   });
   console.log(req.body)
   // And save the new note the db
-  newNote.save(function(error, note) {
+  newNote.save(function(error, dbNote) {
     // Log any errors
     if (error) {
       console.log(error);
@@ -185,7 +152,7 @@ app.post("/notes/save/:id", function(req, res) {
     // Otherwise
     else {
       // Use the article id to find and update it's notes
-      db.Article.findOneAndUpdate({ "_id": req.params.id }, {$push: { "notes": note } })
+      db.Article.findOneAndUpdate({ "_id": req.params.id }, {$push: { "notes": dbNote } })
       // Execute the above query
       .exec(function(err) {
         // Log any errors
@@ -194,8 +161,7 @@ app.post("/notes/save/:id", function(req, res) {
           res.send(err);
         }
         else {
-          // Or send the note to the browser
-          res.send(note);
+          res.send(dbNote);
         }
       });
     }
@@ -205,7 +171,7 @@ app.post("/notes/save/:id", function(req, res) {
 // Delete a note
 app.delete("/notes/delete/:note_id/:article_id", function(req, res) {
   // Use the note id to find and delete it
-  db.Note.findOneAndRemove({ "_id": req.params.note_id }, function(err) {
+  db.Note.remove({ "_id": req.params.note_id }, function(err) {
     // Log any errors
     if (err) {
       console.log(err);
@@ -222,7 +188,7 @@ app.delete("/notes/delete/:note_id/:article_id", function(req, res) {
           }
           else {
             // Or send the note to the browser
-            res.send("Note Deleted");
+            res.send("Note deleted...");
           }
         });
     }

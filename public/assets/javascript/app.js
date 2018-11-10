@@ -1,7 +1,7 @@
 $(".saveNote").on("click", function() {
   var thisId = $(this).attr("data-id");
   if (!$("#noteText" + thisId).val()) {
-      alert("please enter a note to save")
+      alert("please enter a comment")
   }else {
     $.ajax({
           method: "POST",
@@ -15,21 +15,20 @@ $(".saveNote").on("click", function() {
             // Empty the notes section
             $("#noteText" + thisId).val("");
             $(".modalNote").modal("hide");
-            //window.location = "/"
+            window.location = "/";
         });
   }
 });
 
-//Handle Delete Note button
 $(".deleteNote").on("click", function() {
   var noteId = $(this).attr("data-note-id");
   var articleId = $(this).attr("data-article-id");
   $.ajax({
       method: "DELETE",
-      url: "/notes/delete/" + articleId + "/" + noteId
+      url: "/notes/delete/" + noteId + "/" + articleId  
   }).done(function(data) {
       console.log(data)
       $(".modalNote").modal("hide");
-      //window.location = "/"
+      window.location = "/";
   })
 });
